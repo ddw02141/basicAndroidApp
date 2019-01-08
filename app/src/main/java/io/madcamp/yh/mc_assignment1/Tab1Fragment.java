@@ -36,17 +36,14 @@ import java.io.BufferedReader;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+
 import android.database.Cursor;
 import android.widget.Toast;
 
+import io.madcamp.yh.mc_assignment1.Retrofit.IMyService;
 import io.madcamp.yh.mc_assignment1.Retrofit.RetrofitClient;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
@@ -73,7 +70,7 @@ public class Tab1Fragment extends Fragment {
     private ArrayList<ListViewAdapter.Item> shownContacts;
     private ListViewAdapter adapter;
     CompositeDisposable compositeDisposable = new CompositeDisposable();
-    io.madcamp.yh.mc_assignment1.Retrofit.iMyService iMyService;
+    IMyService IMyService;
 
     @Override
     public void onStop(){
@@ -98,7 +95,7 @@ public class Tab1Fragment extends Fragment {
 
         //Init Service
         Retrofit retrofitClient = RetrofitClient.getInstance();
-        iMyService = retrofitClient.create(io.madcamp.yh.mc_assignment1.Retrofit.iMyService.class);
+        IMyService = retrofitClient.create(IMyService.class);
     }
 
     @Override
@@ -347,7 +344,7 @@ public class Tab1Fragment extends Fragment {
             private void addContacts(ArrayList<Pair<String,String>> contacts){
 
                 String j = packIntoJSON(contacts);
-                compositeDisposable.add(iMyService.addContacts(j)
+                compositeDisposable.add(IMyService.addContacts(j)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(new Consumer<String>(){
@@ -362,7 +359,7 @@ public class Tab1Fragment extends Fragment {
             private void getContacts(final ArrayList<Pair<String,String>> contacts){
                 contacts.clear();
                 String j = packIntoJSON(contacts);
-                compositeDisposable.add(iMyService.getContacts(j)
+                compositeDisposable.add(IMyService.getContacts(j)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(new Consumer<String>(){

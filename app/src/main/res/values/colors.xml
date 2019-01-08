@@ -7,4 +7,6 @@
     <color name="colorButtonCorrect">#b3ef9c</color>
     <color name="colorButtonWrong">#ff6d67</color>
     <color name="colorButtonDisabled">#878787</color>
+    <color name="myTextColor">#AFAFAF</color>
+
 </resources>

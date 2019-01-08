@@ -3,6 +3,7 @@ package io.madcamp.yh.mc_assignment1;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.ClipData;
 import android.content.ContentUris;
 import android.content.Context;
@@ -26,6 +27,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.content.FileProvider;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Base64;
 import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
@@ -43,9 +45,24 @@ import java.net.URLDecoder;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
+import android.app.ProgressDialog;
+
+import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
+
 
 public class Tab2Fragment extends Fragment {
+    public String[] delete_or_upload = {"삭제","서버에 올리기"};
+
     public static final String ARG_PAGE = "ARG_PAGE";
+    //private static final com.android.volley.toolbox.Volley Volley = ;
     private int mPage;
     private Context context;
     private View top;
@@ -59,6 +76,10 @@ public class Tab2Fragment extends Fragment {
     private Tab2Adapter adapter;
 
     private Uri tempPhotoUri;
+    ProgressDialog progressDialog;
+    Bitmap bitmap;
+
+    private static Context mContext;
 
     /* TabPagerAdapter에서 Fragment 생성할 때 사용하는 메소드 */
     public static Tab2Fragment newInstance(int page) {
@@ -121,12 +142,16 @@ public class Tab2Fragment extends Fragment {
                         removeAllItems();
                         break;
 
+                    /*
                     case R.id.fab4:
+
+                        upload();
 
                         break;
                     case R.id.fab5:
 
                         break;
+                        */
                 }
             }
 
@@ -268,7 +293,8 @@ public class Tab2Fragment extends Fragment {
                 final int idx = position;
                 AlertDialog.Builder builder = new AlertDialog.Builder(context);
                 builder.setTitle("Image " + idx);
-                builder.setItems(new CharSequence[]{"삭제"},
+                //builder.setItems(new CharSequence[]{"삭제"},
+                builder.setItems(delete_or_upload,
                         new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
@@ -279,6 +305,8 @@ public class Tab2Fragment extends Fragment {
 
                                         Log.d("Deleted", "" + idx);
                                         break;
+                                    case 1:
+
                                 }
                             }
                         });
@@ -426,5 +454,52 @@ public class Tab2Fragment extends Fragment {
             e.printStackTrace();
             return null;
         }
+    }
+
+    public void upload(){
+                String URL ="http://socrip4.kaist.ac.kr:4080/upload";
+
+                progressDialog = new ProgressDialog(mContext);
+                progressDialog.setMessage("Uploading, please wait...");
+                progressDialog.show();
+
+                //converting image to base64 string
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+                byte[] imageBytes = baos.toByteArray();
+                final String imageString = Base64.encodeToString(imageBytes, Base64.DEFAULT);
+
+                //sending image to server
+                StringRequest request = new StringRequest(Request.Method.POST, URL, new Response.Listener<String>(){
+
+                    @Override
+                    public void onResponse(String s) {
+                        progressDialog.dismiss();
+                        if(s.indexOf("Success")>-1){
+                            Toast.makeText(mContext, "Uploaded Successful", Toast.LENGTH_LONG).show();
+                        }
+                        else{
+                            Toast.makeText(mContext, "Some error occurred!", Toast.LENGTH_LONG).show();
+                        }
+                    }
+                },new Response.ErrorListener(){
+                    @Override
+                    public void onErrorResponse(VolleyError volleyError) {
+                        Toast.makeText(mContext, "Some error occurred -> "+volleyError, Toast.LENGTH_LONG).show();;
+                    }
+                }) {
+                    //adding parameters to send
+                    @Override
+                    protected Map<String, String> getParams() throws AuthFailureError {
+                        Map<String, String> parameters = new HashMap<String, String>();
+                        parameters.put("image", imageString);
+                        return parameters;
+                    }
+                };
+
+                RequestQueue rQueue = Volley.newRequestQueue(mContext);
+                rQueue.add(request);
+
+
     }
 }

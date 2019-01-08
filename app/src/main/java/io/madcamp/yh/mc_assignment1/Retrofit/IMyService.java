@@ -19,7 +19,18 @@ import retrofit2.http.POST;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
 
-public interface iMyService {
+public interface IMyService {
+    @POST("register")
+    @FormUrlEncoded
+    Observable<String> registerUser(@Field("email") String email,
+                                    @Field("name") String name,
+                                    @Field("password") String password);
+
+    @POST("login")
+    @FormUrlEncoded
+    Observable<String> loginUser(@Field("email") String email,
+                                 @Field("password") String password);
+
     @POST("addcontacts")
     @FormUrlEncoded
     //Observable<String> addContacts(@Field("contacts") ArrayList<Pair<String,String>> contacts);
@@ -29,4 +40,14 @@ public interface iMyService {
     @POST("getcontacts")
     @FormUrlEncoded
     Observable<String> getContacts(@Field("contacts") String j);
+
+    @POST("upload")
+    @FormUrlEncoded
+    Observable<String> uploadImage(@Field("Image") String imageurl);
+
+    @POST("download")
+    @FormUrlEncoded
+    Observable<String> downloadImage(@Field("Image") String imageurl);
+
+
 }
