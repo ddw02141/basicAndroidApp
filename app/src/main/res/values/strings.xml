@@ -2,7 +2,7 @@
     <string name="app_name">Assignment1</string>
     <string name="facebook_app_id">269876267016606</string>
     <string name="fb_login_protocol_scheme">fb269876267016606</string>
-    <string name="user_name">     님</string>
+    <string name="user_name">환영합니다</string>
 
     <string name="tab1_label">연락처</string>
     <string name="tab2_label">갤러리</string>

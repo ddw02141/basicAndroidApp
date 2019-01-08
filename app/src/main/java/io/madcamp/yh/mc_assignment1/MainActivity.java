@@ -19,11 +19,13 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.facebook.login.LoginManager;
+import com.gun0912.tedpermission.PermissionListener;
 
 import java.util.ArrayList;
-
+import java.util.List;
+import com.gun0912.tedpermission.PermissionListener;
+import com.gun0912.tedpermission.TedPermission;
 public class MainActivity extends AppCompatActivity {
-    final int PERMISSION_REQ_CODE = 1;
     Toolbar myToolbar;
 
     @Override
@@ -33,10 +35,36 @@ public class MainActivity extends AppCompatActivity {
 
         myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
         setSupportActionBar(myToolbar);
-
         /* 탭 초기화 */
+
         setupTabs();
+
+
+        PermissionListener permissionlistener = new PermissionListener() {
+            @Override
+            public void onPermissionGranted() {
+                Toast.makeText(MainActivity.this, "Permission Granted", Toast.LENGTH_SHORT).show();
+
+            }
+
+            @Override
+            public void onPermissionDenied(List<String> deniedPermissions) {
+                Toast.makeText(MainActivity.this, "Permission Denied\n" + deniedPermissions.toString(), Toast.LENGTH_SHORT).show();
+                finish();
+            }
+
+
+        };
+
+        TedPermission.with(this)
+                .setPermissionListener(permissionlistener)
+                .setDeniedMessage("If you reject permission,you can not use this service\n\nPlease turn on permissions at [Setting] > [Permission]")
+                .setPermissions(Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_CONTACTS)
+                .check();
+
+
     }
+
 
     private void setupTabs() {
         /* 필요한 View를 불러옴 */

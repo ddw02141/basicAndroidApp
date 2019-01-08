@@ -1,7 +1,9 @@
 package io.madcamp.yh.mc_assignment1;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
@@ -39,6 +41,7 @@ import retrofit2.Retrofit;
 
 public class LogInActivity extends AppCompatActivity {
 
+
     CallbackManager callbackManager;
     AccessTokenTracker accessTokenTracker;
     ProfileTracker profileTracker;
@@ -70,6 +73,7 @@ public class LogInActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
 
         //accessToken = AccessToken.getCurrentAccessToken();
         //boolean isLoggedIn = accessToken != null && !accessToken.isExpired();
@@ -117,83 +121,16 @@ public class LogInActivity extends AppCompatActivity {
             }
         };
 
-        //loginButton.setReadPermissions(Arrays.asList("public_profile","email","user_birthday","user_friends"));
         loginButton.setReadPermissions("user_friends");
         loginButton.registerCallback(callbackManager, callback);
-
-//        loginButton.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
-//            @Override
-//            public void onSuccess(LoginResult loginResult) {
-//                mDialog = new ProgressDialog(LogInActivity.this);
-//                mDialog.setMessage("Retreiving data ...");
-//                mDialog.show();
-//
-//                String accesstoken = loginResult.getAccessToken().getToken();
-//
-//                GraphRequest request = GraphRequest.newMeRequest(loginResult.getAccessToken(), new GraphRequest.GraphJSONObjectCallback() {
-//                    @Override
-//                    public void onCompleted(JSONObject object, GraphResponse response) {
-//                        mDialog.dismiss();
-//                        Log.d("response", response.toString());
-//                        getData(object);
-//                    }
-//                });
-//
-//                Bundle parameters = new Bundle();
-//                parameters.putString("fields","id,email,birthday,friends");
-//                request.setParameters(parameters);
-//                request.executeAsync();
-//            }
-//
-//            @Override
-//            public void onCancel() {
-//
-//            }
-//
-//            @Override
-//            public void onError(FacebookException error) {
-//
-//            }
-//        });
-
-//        if(AccessToken.getCurrentAccessToken() != null){
-//            txtEmail.setText(AccessToken.getCurrentAccessToken().getUserId());
-//        }
-
-//        LoginManager.getInstance().registerCallback(callbackManager,
-//                new FacebookCallback<LoginResult>() {
-//                    @Override
-//                    public void onSuccess(LoginResult loginResult) {
-//                        // App code
-//                        Intent intent = new Intent(LogInActivity.this, MainActivity.class);
-//                        intent.putExtra("email", txtEmail.toString());
-//                        intent.putExtra("birthday", txtBirthday.toString());
-//                        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-//                        imgAvatar.buildDrawingCache();
-//                        Bitmap bitmap = imgAvatar.getDrawingCache();
-//                        bitmap.compress(Bitmap.CompressFormat.PNG, 50, byteArrayOutputStream);
-//                        intent.putExtra("byteArray", byteArrayOutputStream.toByteArray());
-//                        //LogInActivity.this.startActivity(intent);
-//                        startActivity(intent);
-//                        //Toast.makeText(LogInActivity.this, "Facebook Login success", Toast.LENGTH_SHORT).show();
-//                    }
-//
-//                    @Override
-//                    public void onCancel() {
-//                        // App code
-//                    }
-//
-//                    @Override
-//                    public void onError(FacebookException exception) {
-//                        // App code
-//                    }
-//                });
 
         Retrofit retrofitClient = RetrofitClient.getInstance();
         iMyService = retrofitClient.create(IMyService.class);
 
         edt_login_email = (MaterialEditText) findViewById(R.id.edt_email);
         edt_login_password = (MaterialEditText) findViewById(R.id.edt_password);
+
+
 
         btn_login = (Button) findViewById(R.id.btn_login);
         btn_login.setOnClickListener(new View.OnClickListener() {

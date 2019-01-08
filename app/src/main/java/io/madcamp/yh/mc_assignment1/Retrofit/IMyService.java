@@ -46,8 +46,8 @@ public interface IMyService {
     Observable<String> uploadImage(@Field("Image") String imageurl);
 
     @POST("download")
-    @FormUrlEncoded
-    Observable<String> downloadImage(@Field("Image") String imageurl);
+    //@FormUrlEncoded
+    Observable<String> downloadImage();
 
 
 }

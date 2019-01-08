@@ -9,6 +9,7 @@ import android.content.ContentUris;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -27,6 +28,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.content.FileProvider;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.util.Base64;
 import android.util.Log;
 import android.util.Pair;
@@ -56,9 +58,22 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.rengwuxian.materialedittext.MaterialEditText;
+
+import io.madcamp.yh.mc_assignment1.Retrofit.IMyService;
+import io.madcamp.yh.mc_assignment1.Retrofit.RetrofitClient;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.CompositeDisposable;
+import io.reactivex.functions.Consumer;
+import io.reactivex.schedulers.Schedulers;
+import retrofit2.Retrofit;
 
 
 public class Tab2Fragment extends Fragment {
+
+    static String login_email;
+    CompositeDisposable compositeDisposable = new CompositeDisposable();
+    IMyService iMyService;
     public String[] delete_or_upload = {"삭제","서버에 올리기"};
 
     public static final String ARG_PAGE = "ARG_PAGE";
@@ -66,7 +81,6 @@ public class Tab2Fragment extends Fragment {
     private int mPage;
     private Context context;
     private View top;
-
     private boolean isFabOpen;
 
     private static final int REQ_IMG_FILE = 1;
@@ -79,7 +93,7 @@ public class Tab2Fragment extends Fragment {
     ProgressDialog progressDialog;
     Bitmap bitmap;
 
-    private static Context mContext;
+    public static Context mContext;
 
     /* TabPagerAdapter에서 Fragment 생성할 때 사용하는 메소드 */
     public static Tab2Fragment newInstance(int page) {
@@ -94,6 +108,9 @@ public class Tab2Fragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mPage = getArguments().getInt(ARG_PAGE);
+
+        Retrofit retrofitClient = RetrofitClient.getInstance();
+        iMyService = retrofitClient.create(IMyService.class);
     }
 
     @Override
@@ -119,7 +136,6 @@ public class Tab2Fragment extends Fragment {
                 top.findViewById(R.id.fab2),
                 top.findViewById(R.id.fab3),
                 top.findViewById(R.id.fab4),
-                top.findViewById(R.id.fab5),
         };
 
         isFabOpen = false;
@@ -142,16 +158,14 @@ public class Tab2Fragment extends Fragment {
                         removeAllItems();
                         break;
 
-                    /*
                     case R.id.fab4:
 
-                        upload();
+                        //downimage(login_email);
+                        downimage();
 
                         break;
-                    case R.id.fab5:
 
-                        break;
-                        */
+
                 }
             }
 
@@ -176,7 +190,7 @@ public class Tab2Fragment extends Fragment {
             }
         };
 
-        for(int i = 0; i < 6; i++) {
+        for(int i = 0; i < 5; i++) {
             fab[i].setOnClickListener(onClickListener);
         }
     }
@@ -306,6 +320,21 @@ public class Tab2Fragment extends Fragment {
                                         Log.d("Deleted", "" + idx);
                                         break;
                                     case 1:
+
+                                        //Intent intent = new Intent(mContext, UploadImageActivity.class);
+                                                //Intent intent = new Intent(mContext, UploadImageActivity.class);
+                                                Intent intent = new Intent(getActivity(), UploadImageActivity.class);
+
+                                                intent.putExtra("imageUri", adapter.dataSet.get(idx).first.toString());
+                                                intent.putExtra("imageTag",adapter.dataSet.get(idx).second);
+
+                                                System.out.println("Tab2 imageUri : " + adapter.dataSet.get(idx).first);
+                                                System.out.println("Tab2 imageTag : " + adapter.dataSet.get(idx).second);
+                                                startActivity(intent);
+                                                //intent.setType("image/*");
+                                                //intent.setAction(Intent.ACTION_PICK);
+                                                //startActivityForResult(Intent.createChooser(intent, "Select Image"), 111);
+                                                break;
 
                                 }
                             }
@@ -456,50 +485,42 @@ public class Tab2Fragment extends Fragment {
         }
     }
 
-    public void upload(){
-                String URL ="http://socrip4.kaist.ac.kr:4080/upload";
+    public void downimage(){
 
-                progressDialog = new ProgressDialog(mContext);
-                progressDialog.setMessage("Uploading, please wait...");
-                progressDialog.show();
+//        System.out.println("email : " + email);
+//        if (TextUtils.isEmpty(email)) {
+//            Toast.makeText(getActivity(), "Download error", Toast.LENGTH_SHORT).show();
+//            return;
+//        }
 
-                //converting image to base64 string
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-                byte[] imageBytes = baos.toByteArray();
-                final String imageString = Base64.encodeToString(imageBytes, Base64.DEFAULT);
-
-                //sending image to server
-                StringRequest request = new StringRequest(Request.Method.POST, URL, new Response.Listener<String>(){
-
+        compositeDisposable.add(iMyService.downloadImage()
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Consumer<String>() {
                     @Override
-                    public void onResponse(String s) {
-                        progressDialog.dismiss();
-                        if(s.indexOf("Success")>-1){
-                            Toast.makeText(mContext, "Uploaded Successful", Toast.LENGTH_LONG).show();
-                        }
-                        else{
-                            Toast.makeText(mContext, "Some error occurred!", Toast.LENGTH_LONG).show();
-                        }
-                    }
-                },new Response.ErrorListener(){
-                    @Override
-                    public void onErrorResponse(VolleyError volleyError) {
-                        Toast.makeText(mContext, "Some error occurred -> "+volleyError, Toast.LENGTH_LONG).show();;
-                    }
-                }) {
-                    //adding parameters to send
-                    @Override
-                    protected Map<String, String> getParams() throws AuthFailureError {
-                        Map<String, String> parameters = new HashMap<String, String>();
-                        parameters.put("image", imageString);
-                        return parameters;
-                    }
-                };
+                    public void accept(String response) throws Exception {
+                        //Toast.makeText(getActivity(), "" + response, Toast.LENGTH_SHORT).show();
 
-                RequestQueue rQueue = Volley.newRequestQueue(mContext);
-                rQueue.add(request);
+
+                        //decode response
+                        String flow = "";
+                        System.out.println("Test " + response);
+                        byte[] decodedString = Base64.decode(response, Base64.NO_WRAP);
+                        Bitmap decodedByte = BitmapFactory.decodeByteArray(decodedString, 0, decodedString.length);
+
+                        String path = MediaStore.Images.Media.insertImage(getActivity().getContentResolver(), decodedByte, "Title", null);
+
+                        addImage(Uri.parse(path));
+
+                    }
+
+                }));
+
 
 
     }
+
+
+
+
 }
