@@ -1,5 +1,3 @@
-# madcamp_week2
-# madcamp_week2
 # SecondApp
 
 SecondApp is android-based application platform that can manage contacts, galleries, and amateur game scores with server. 
@@ -9,7 +7,9 @@ SecondApp is android-based application platform that can manage contacts, galler
 ### Developers
 
 Sangwon Lee
+
 Yeonggyun Yun
+
 Hyogun Lee
 
 ---
